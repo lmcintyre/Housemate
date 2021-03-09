@@ -44,15 +44,15 @@ namespace Housemate
         {
             _ui.Visible = true;
         }
-
+        
+        private void DrawConfigUI()
+        {
+            _ui.Visible = true;
+        }
+        
         private void DrawUI()
         {
             _ui.Draw();
-        }
-
-        private void DrawConfigUI()
-        {
-            _ui.SettingsVisible = true;
         }
     }
 }

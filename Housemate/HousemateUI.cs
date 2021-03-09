@@ -16,12 +16,18 @@ namespace Housemate
         private ImGuiListClipperPtr _clipper;
         private readonly Configuration _configuration;
         private readonly DalamudPluginInterface _pi;
-
+        
         private bool _visible;
+        public bool Visible
+        {
+            get => _visible;
+            set => _visible = value;
+        }
+        
         private bool _outLast;
 
-        private HousingData _data => HousingData.Instance;
-        private HousingMemory _mem => HousingMemory.Instance;
+        private static HousingData Data => HousingData.Instance;
+        private static HousingMemory Mem => HousingMemory.Instance;
 
         public HousemateUI(Configuration configuration, DalamudPluginInterface pi)
         {
@@ -33,15 +39,7 @@ namespace Housemate
             Marshal.StructureToPtr(clipper, clipperNative, false);
             _clipper = new ImGuiListClipperPtr(clipperNative);
         }
-
-        public bool Visible
-        {
-            get => _visible;
-            set => _visible = value;
-        }
-
-        public bool SettingsVisible { get; set; }
-
+        
         public unsafe void Dispose()
         {
             Marshal.FreeHGlobal(new IntPtr(_clipper.NativePtr));
@@ -62,7 +60,7 @@ namespace Housemate
         {
             var placardIdOffset = 120;
 
-            if (!_data.TryGetLandSetDict(_mem.GetTerritoryTypeId(), out var landSets)) return;
+            if (!Data.TryGetLandSetDict(Mem.GetTerritoryTypeId(), out var landSets)) return;
 
             var actorTable = _pi.ClientState.Actors;
             if (actorTable == null) return;
@@ -81,7 +79,7 @@ namespace Housemate
 
         private unsafe void Render(float renderDistance = 50f)
         {
-            var mgr = _mem.CurrentManager;
+            var mgr = Mem.CurrentManager;
             if (mgr == null) return;
 
             for (var i = 0; i < 400; i++)
@@ -90,14 +88,14 @@ namespace Housemate
                 if (hObject == null) continue;
 
                 var objectName = "unknown";
-                if (_mem.IsOutdoors())
+                if (Mem.IsOutdoors())
                 {
-                    if (_data.TryGetYardObject(hObject->housingRowId, out var yardObject))
+                    if (Data.TryGetYardObject(hObject->housingRowId, out var yardObject))
                         objectName = yardObject.Item.Value.Name.ToString();
                 }
                 else
                 {
-                    if (_data.TryGetFurniture(hObject->housingRowId, out var furnitureObject))
+                    if (Data.TryGetFurniture(hObject->housingRowId, out var furnitureObject))
                         objectName = furnitureObject.Item.Value.Name.ToString();
                 }
 
@@ -128,7 +126,7 @@ namespace Housemate
                 }
 
                 ImGui.Text($"{objectName}");
-                if (hObject->color != 0 && _data.TryGetStain(hObject->color, out var color))
+                if (hObject->color != 0 && Data.TryGetStain(hObject->color, out var color))
                 {
                     ImGui.SameLine();
                     Utils.StainButton(objectName, color);
@@ -142,7 +140,7 @@ namespace Housemate
 
         private void DrawPlotPlate(Actor placard, uint placardId, CommonLandSet land)
         {
-            if (!_mem.GetHousingController(out var controller)) return;
+            if (!Mem.GetHousingController(out var controller)) return;
             var customize = controller.Houses(land.PlotIndex);
 
             if (_pi.Framework.Gui.WorldToScreen(new SharpDX.Vector3 {X = placard.Position.X, Y = placard.Position.Z + 4, Z = placard.Position.Y}, out var screenCoords))
@@ -165,11 +163,11 @@ namespace Housemate
 
                 // Let's check if this is a unified exterior
                 var roof = customize.GetPart(ExteriorPartsType.Roof);
-                if (roof.FixtureKey != 0 && _data.IsUnitedExteriorPart(roof.FixtureKey, out var roofItem))
+                if (roof.FixtureKey != 0 && Data.IsUnitedExteriorPart(roof.FixtureKey, out var roofItem))
                 {
                     ImGui.Text($"Exterior: {roofItem.Name}");
 
-                    if (roof.Color != 0 && _data.TryGetStain(roof.Color, out var color))
+                    if (roof.Color != 0 && Data.TryGetStain(roof.Color, out var color))
                     {
                         ImGui.SameLine();
                         Utils.StainButton(roofItem.Name, color);
@@ -181,10 +179,10 @@ namespace Housemate
                     {
                         var type = (ExteriorPartsType) i;
                         var part = customize.GetPart(type);
-                        if (!_data.TryGetItem(part.FixtureKey, out var item)) continue;
+                        if (!Data.TryGetItem(part.FixtureKey, out var item)) continue;
                         ImGui.Text($"{Utils.GetExteriorPartDescriptor(type)}: {item.Name}");
 
-                        if (part.Color != 0 && _data.TryGetStain(part.Color, out var color))
+                        if (part.Color != 0 && Data.TryGetStain(part.Color, out var color))
                         {
                             ImGui.SameLine();
                             Utils.StainButton(item.Name, color);
@@ -199,7 +197,7 @@ namespace Housemate
 
         private void DrawMainWindow()
         {
-            if (!_visible && !SettingsVisible) return;
+            if (!_visible) return;
 
             ImGui.SetNextWindowSize(new Vector2(375, 600), ImGuiCond.FirstUseEver);
             if (ImGui.Begin("Housemate", ref _visible, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
@@ -209,7 +207,7 @@ namespace Housemate
                 bool isSwapping = false;
                 
                 // DevTab();
-                if (_mem.IsOutdoors())
+                if (Mem.IsOutdoors())
                 {
                     if (!_outLast)
                         isSwapping = true;
@@ -217,7 +215,7 @@ namespace Housemate
                     _outLast = true;
                 }
 
-                if (_mem.IsIndoors())
+                if (Mem.IsIndoors())
                 {
                     if (_outLast)
                         isSwapping = true;
@@ -249,7 +247,7 @@ namespace Housemate
         {
             if (!ImGui.BeginTabItem("Outdoors")) return;
 
-            if (_mem.CurrentManager == null || _mem.IsIndoors())
+            if (Mem.CurrentManager == null || Mem.IsIndoors())
             {
                 ImGui.Text("You aren't in an outdoor housing zone!");
                 ImGui.EndTabItem();
@@ -275,8 +273,8 @@ namespace Housemate
             ImGui.SetColumnWidth(0, 38f);
             ImGui.SetColumnWidth(1, 300f);
 
-            var basePlot = _mem.GetExteriorCommonFixtures(0);
-            var subPlot = _mem.GetExteriorCommonFixtures(30);
+            var basePlot = Mem.GetExteriorCommonFixtures(0);
+            var subPlot = Mem.GetExteriorCommonFixtures(30);
 
             int start = 0, end = 0;
 
@@ -293,13 +291,13 @@ namespace Housemate
 
             for (var plotId = start; plotId < end; plotId++)
             {
-                var exterior = _mem.GetExteriorCommonFixtures(plotId);
+                var exterior = Mem.GetExteriorCommonFixtures(plotId);
                 if (exterior.Length == 0 || exterior[0].FixtureType == -1) continue;
 
                 ImGui.Text($"{plotId + 1}");
                 ImGui.NextColumn();
 
-                if (_data.IsUnitedExteriorPart((uint) exterior[0].FixtureKey, out var unitedItem))
+                if (Data.IsUnitedExteriorPart((uint) exterior[0].FixtureKey, out var unitedItem))
                 {
                     ImGui.Text($"Walls: {unitedItem.Name}");
                     if (exterior[0].Stain != null && exterior[0].Stain.RowId != 0)
@@ -369,13 +367,13 @@ namespace Housemate
             if (_configuration.SortObjectLists)
             {
                 if (_configuration.SortType == SortType.Distance)
-                    dObjectsLoaded = _mem.TryGetSortedHousingGameObjectList(out dObjects, nPos.Value);
+                    dObjectsLoaded = Mem.TryGetSortedHousingGameObjectList(out dObjects, nPos.Value);
                 else
-                    dObjectsLoaded = _mem.TryGetNameSortedHousingGameObjectList(out dObjects);
+                    dObjectsLoaded = Mem.TryGetNameSortedHousingGameObjectList(out dObjects);
             }
             else
             {
-                dObjectsLoaded = _mem.TryGetUnsortedHousingGameObjectList(out dObjects);
+                dObjectsLoaded = Mem.TryGetUnsortedHousingGameObjectList(out dObjects);
             }
 
             if (!dObjectsLoaded)
@@ -392,9 +390,9 @@ namespace Housemate
                     var gameObject = dObjects[i];
 
                     var itemName = "";
-                    if (_data.TryGetYardObject(gameObject.housingRowId, out var yardObject))
+                    if (Data.TryGetYardObject(gameObject.housingRowId, out var yardObject))
                         itemName = yardObject.Item.Value.Name.ToString();
-                    if (_data.TryGetFurniture(gameObject.housingRowId, out var furnitureObject))
+                    if (Data.TryGetFurniture(gameObject.housingRowId, out var furnitureObject))
                         itemName = furnitureObject.Item.Value.Name.ToString();
 
                     var distance = Utils.DistanceFromPlayer(gameObject, nPos.Value);
@@ -402,7 +400,7 @@ namespace Housemate
                     ImGui.Text($"{distance:F2}");
                     ImGui.NextColumn();
                     ImGui.Text($"{itemName}");
-                    if (gameObject.color != 0 && _data.TryGetStain(gameObject.color, out var stain))
+                    if (gameObject.color != 0 && Data.TryGetStain(gameObject.color, out var stain))
                     {
                         ImGui.SameLine();
                         Utils.StainButton($"##{distance}{itemName}", stain);
@@ -419,7 +417,7 @@ namespace Housemate
         {
             if (!ImGui.BeginTabItem("Indoors")) return;
 
-            if (_mem.CurrentManager == null || _mem.IsOutdoors())
+            if (Mem.CurrentManager == null || Mem.IsOutdoors())
             {
                 ImGui.Text("You aren't in an indoor housing zone!");
                 ImGui.EndTabItem();
@@ -452,9 +450,9 @@ namespace Housemate
             {
                 for (var i = 0; i < IndoorAreaData.FloorMax; i++)
                 {
-                    var fixtures = _mem.GetInteriorCommonFixtures(i);
+                    var fixtures = Mem.GetInteriorCommonFixtures(i);
                     if (fixtures.Length == 0) continue;
-                    var isCurrentFloor = _mem.CurrentFloor() == (InteriorFloor) i;
+                    var isCurrentFloor = Mem.CurrentFloor() == (InteriorFloor) i;
 
                     for (var j = 0; j < IndoorFloorData.PartsMax; j++)
                     {
@@ -502,7 +500,7 @@ namespace Housemate
                 }
 
                 ImGui.Columns(1);
-                ImGui.Text($"Light level: {_mem.GetInteriorLightLevel()}");
+                ImGui.Text($"Light level: {Mem.GetInteriorLightLevel()}");
             }
             catch (Exception e)
             {
