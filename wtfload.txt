@@ -1,0 +1,25 @@
+            var sheet = pi.Data.GetExcelSheet<HousingLandSet>();
+            if (sheet == null)
+            {
+                _territoryToLandSetDict = JsonConvert.DeserializeObject<Dictionary<uint, Dictionary<uint, CommonLandSet>>>(File.ReadAllText(@"C:\Users\Liam\Desktop\tmp\dict.txt"));
+            }
+            else
+            {
+                uint[] terriKeys = {339, 340, 341, 641};
+
+                _territoryToLandSetDict = new Dictionary<uint, Dictionary<uint, CommonLandSet>>();
+
+                for (uint i = 0; i < sheet.RowCount; i++)
+                {
+                    if (terriKeys.Length < i) continue;
+                    var row = sheet.GetRow(i);
+                    var rowDict = new Dictionary<uint, CommonLandSet>();
+                    for (var j = 0; j < row.LandSets.Length; j++)
+                    {
+                        var cset = CommonLandSet.FromExd(row.LandSets[j], j);
+                        rowDict[cset.PlacardId] = cset;
+                    }
+
+                    _territoryToLandSetDict[terriKeys[i]] = rowDict;
+                }
+            }
