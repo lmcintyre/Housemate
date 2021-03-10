@@ -93,12 +93,13 @@ namespace Housemate
             var floatColor = StainToVector4(color.Color);
             var topLeft = ImGui.GetCursorScreenPos();
             ImGui.ColorButton($"##{id}", floatColor, ImGuiColorEditFlags.NoTooltip, size);
+            bool buttonVisible = ImGui.IsItemVisible();
             var bottom = ImGui.GetCursorScreenPos().Y;
             ImGui.SameLine();
             var right = ImGui.GetCursorScreenPos().X;
             ImGui.Text("");
 
-            if (Collides(topLeft, new Vector2(right, bottom), mousePos))
+            if (buttonVisible && Collides(topLeft, new Vector2(right, bottom), mousePos))
                 ColorTooltip(color.Name, floatColor);
         }
         

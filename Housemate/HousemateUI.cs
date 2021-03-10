@@ -25,6 +25,7 @@ namespace Housemate
         }
         
         private bool _outLast;
+        private bool _objectsOpen;
 
         private static HousingData Data => HousingData.Instance;
         private static HousingMemory Mem => HousingMemory.Instance;
@@ -254,7 +255,12 @@ namespace Housemate
                 return;
             }
 
-            ImGui.Text("Homes");
+            if (!ImGui.CollapsingHeader("Homes", ImGuiTreeNodeFlags.DefaultOpen))
+            {
+                RenderHousingObjectList(true);
+                ImGui.EndTabItem();
+                return;
+            }
 
             // Column header outside of the child
             ImGui.BeginChild("##COLUMNAPIISDUMBIHATEYOU1", new Vector2(200, ImGui.GetFontSize()), false);
@@ -266,8 +272,10 @@ namespace Housemate
             ImGui.NextColumn();
             ImGui.SetColumnWidth(1, 300f);
             ImGui.EndChild();
-
-            ImGui.BeginChild("##homes", new Vector2(-1, ImGui.GetFontSize() * 15f), false);
+            
+            float size = _objectsOpen ? ImGui.GetFontSize() * 15f : ImGui.GetWindowHeight() - 140f * Utils.GlobalFontScale();
+            
+            ImGui.BeginChild("##homes", new Vector2(-1, size), false);
 
             ImGui.Columns(2);
             ImGui.SetColumnWidth(0, 38f);
@@ -328,16 +336,25 @@ namespace Housemate
             }
 
             ImGui.EndChild();
-            ImGui.Separator();
-
-            RenderHousingObjectList();
-
+            RenderHousingObjectList(true);
             ImGui.EndTabItem();
         }
 
-        private void RenderHousingObjectList()
+        private void RenderHousingObjectList(bool collapsible)
         {
-            ImGui.Text("Nearby housing objects");
+            if (collapsible)
+            {
+                if (!ImGui.CollapsingHeader("Nearby housing objects"))
+                {
+                    _objectsOpen = false;
+                    return;
+                }
+            }
+            else
+            {
+                ImGui.Text("Nearby housing objects");
+            }
+            _objectsOpen = true;
 
             ImGui.BeginChild("##COLUMNAPIISDUMBIHATEYOU2", new Vector2(200, ImGui.GetFontSize()), false);
             ImGui.Columns(2);
@@ -424,7 +441,12 @@ namespace Housemate
                 return;
             }
 
-            ImGui.Text("Fixtures");
+            if (!ImGui.CollapsingHeader("Fixtures", ImGuiTreeNodeFlags.DefaultOpen))
+            {
+                RenderHousingObjectList(false);
+                ImGui.EndTabItem();
+                return;
+            }
 
             // Column header outside of the child
             var fixtureColumnWidth = 135f;
@@ -470,33 +492,6 @@ namespace Housemate
                     ImGui.Columns(1);
                     ImGui.Separator();
                     ImGui.Columns(2);
-
-                    // if (isCurrentFloor)
-                    // {
-                    //     ImGui.Columns(1);
-                    //     ImGui.Spacing();
-                    //     ImGui.Separator();
-                    //     ImGui.Columns(2);
-                    // }
-                    //
-                    // for (int j = 0; j < IndoorFloorData.PartsMax; j++)
-                    // {
-                    //     if (fixtures[j].FixtureKey == -1 || fixtures[j].FixtureKey == 0) continue;
-                    //     var fixtureName = Utils.GetInteriorPartDescriptor((InteriorPartsType) j);
-                    //
-                    //     ImGui.Text($"{Utils.GetFloorDescriptor((InteriorFloor) i)} {fixtureName}");
-                    //     ImGui.NextColumn();
-                    //     ImGui.Text($"{fixtures[j].Item.Name}");
-                    //     ImGui.NextColumn();
-                    // }
-                    //
-                    // if (isCurrentFloor)
-                    // {
-                    //     ImGui.Columns(1);
-                    //     ImGui.Separator();
-                    //     ImGui.Spacing();
-                    //     ImGui.Columns(2);
-                    // }
                 }
 
                 ImGui.Columns(1);
@@ -510,7 +505,7 @@ namespace Housemate
             ImGui.EndChild();
             ImGui.Separator();
 
-            RenderHousingObjectList();
+            RenderHousingObjectList(false);
 
             ImGui.EndTabItem();
         }
