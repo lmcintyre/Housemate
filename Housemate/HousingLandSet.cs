@@ -1,22 +1,23 @@
 ﻿using System.Runtime.InteropServices;
+using Lumina;
 using Lumina.Data;
 using Lumina.Excel;
 
 namespace Housemate
 {
     [Sheet("HousingLandSet")]
-    public class HousingLandSet : IExcelRow
+    public class HousingLandSet : ExcelRow
     {
         public LandSet[] LandSets;
 
         public uint UnknownRange { get; private set; }
         public uint UnknownRange2 { get; private set; }
 
-        public uint RowId { get; set; }
-        public uint SubRowId { get; set; }
-
-        public void PopulateData(RowParser parser, Lumina.Lumina lumina, Language language)
+        public override void PopulateData(RowParser parser, GameData data, Language language)
         {
+            RowId = parser.Row;
+            SubRowId = parser.SubRow;
+            
             LandSets = parser.ReadStructuresAsArray<LandSet>(0, 60);
             UnknownRange = parser.ReadColumn<uint>(300);
             UnknownRange2 = parser.ReadColumn<uint>(301);

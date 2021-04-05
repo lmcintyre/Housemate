@@ -35,7 +35,7 @@ namespace Housemate
             _configuration = configuration;
             _pi = pi;
 
-            var clipperNative = Marshal.AllocHGlobal(24);
+            var clipperNative = Marshal.AllocHGlobal(Marshal.SizeOf<ImGuiListClipper>());
             var clipper = new ImGuiListClipper();
             Marshal.StructureToPtr(clipper, clipperNative, false);
             _clipper = new ImGuiListClipperPtr(clipperNative);
@@ -110,6 +110,7 @@ namespace Housemate
                 ImGui.PushID("HousingObjects" + i);
                 ImGui.SetNextWindowPos(new Vector2(screenCoords.X, screenCoords.Y));
                 ImGui.SetNextWindowBgAlpha(0.5f);
+                ImGui.SetNextWindowViewport(ImGui.GetMainViewport().ID);
 
                 ImGui.Begin($"hou{i}",
                     ImGuiWindowFlags.NoDecoration |
@@ -149,6 +150,7 @@ namespace Housemate
                 ImGui.PushID($"Placard{placardId}");
                 ImGui.SetNextWindowPos(new Vector2(screenCoords.X, screenCoords.Y));
                 ImGui.SetNextWindowBgAlpha(0.5f);
+                ImGui.SetNextWindowViewport(ImGui.GetMainViewport().ID);
 
                 ImGui.Begin($"Plot {land.PlotIndex + 1}",
                     ImGuiWindowFlags.NoCollapse |
