@@ -50,7 +50,7 @@ namespace Housemate
 
         public static float DistanceFromPlayer(HousingGameObject obj, Vector3 playerPos)
         {
-            return Distance(new Vector3(playerPos.X, playerPos.Z, playerPos.Y), new Vector3(obj.X, obj.Y, obj.Z));
+            return Distance(new Vector3(playerPos.X, playerPos.Y, playerPos.Z), new Vector3(obj.X, obj.Y, obj.Z));
         }
 
         public static float Distance(Vector3 v1, Vector3 v2)

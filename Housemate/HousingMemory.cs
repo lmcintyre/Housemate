@@ -3,22 +3,24 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using Dalamud.Game;
+using Dalamud.Logging;
 using Dalamud.Plugin;
 
 namespace Housemate
 {
     public class HousingMemory
     {
-        private HousingMemory(DalamudPluginInterface pi)
+        private HousingMemory(SigScanner scanner)
         {
             try
             {
                 HousingModulePtr =
-                    pi.TargetModuleScanner.GetStaticAddressFromSig(
+                    scanner.GetStaticAddressFromSig(
                         "40 53 48 83 EC 20 33 DB 48 39 1D ?? ?? ?? ?? 75 2C 45 33 C0 33 D2 B9 ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 85 C0 74 11 48 8B C8 E8 ?? ?? ?? ?? 48 89 05 ?? ?? ?? ?? EB 07", 0xA);
 
                 LayoutWorldPtr =
-                    pi.TargetModuleScanner.GetStaticAddressFromSig(
+                    scanner.GetStaticAddressFromSig(
                         "48 8B 05 ?? ?? ?? ?? 48 8B 48 20 48 85 C9 74 31 83 B9 ?? ?? ?? ?? ?? 74 28 80 B9 ?? ?? ?? ?? ?? 75 1F 80 B9 ?? ?? ?? ?? ?? 74 03 B0 01 C3", 2);
 
                 PluginLog.Log($"Pre-HousingModule at {HousingModulePtr.ToInt64():X}");
@@ -45,9 +47,9 @@ namespace Housemate
         private unsafe LayoutWorld* LayoutWorld => (LayoutWorld*) LayoutWorldPtr;
         public unsafe HousingObjectManager* CurrentManager => HousingModule->currentTerritory;
 
-        public static void Init(DalamudPluginInterface pi)
+        public static void Init(SigScanner scanner)
         {
-            Instance = new HousingMemory(pi);
+            Instance = new HousingMemory(scanner);
         }
 
         public unsafe InteriorFloor CurrentFloor()

@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using Dalamud.Game.ClientState.Actors.Types;
-using Dalamud.Plugin;
+using Dalamud.Game.ClientState;
+using Dalamud.Game.ClientState.Objects;
+using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Game.Gui;
+using Dalamud.Logging;
 using ImGuiNET;
 
 namespace Housemate
@@ -15,7 +18,9 @@ namespace Housemate
 
         private ImGuiListClipperPtr _clipper;
         private readonly Configuration _configuration;
-        private readonly DalamudPluginInterface _pi;
+        private readonly ObjectTable _objectTable;
+        private readonly ClientState _clientState;
+        private readonly GameGui _gameGui;
         
         private bool _visible;
         public bool Visible
@@ -30,10 +35,16 @@ namespace Housemate
         private static HousingData Data => HousingData.Instance;
         private static HousingMemory Mem => HousingMemory.Instance;
 
-        public HousemateUI(Configuration configuration, DalamudPluginInterface pi)
+        public HousemateUI(
+            Configuration configuration,
+            ObjectTable objectTable,
+            ClientState clientState,
+            GameGui gameGui)
         {
             _configuration = configuration;
-            _pi = pi;
+            _objectTable = objectTable;
+            _clientState = clientState;
+            _gameGui = gameGui;
 
             var clipperNative = Marshal.AllocHGlobal(Marshal.SizeOf<ImGuiListClipper>());
             var clipper = new ImGuiListClipper();
@@ -63,18 +74,14 @@ namespace Housemate
 
             if (!Data.TryGetLandSetDict(Mem.GetTerritoryTypeId(), out var landSets)) return;
 
-            var actorTable = _pi.ClientState.Actors;
-            if (actorTable == null) return;
-
-            foreach (var actor in actorTable)
+            foreach (var obj in _objectTable)
             {
-                if (actor == null) continue;
-                if (_pi.ClientState.LocalPlayer == null) continue;
-                var placardId = *(uint*) ((byte*) actor.Address.ToPointer() + placardIdOffset);
+                if (_clientState.LocalPlayer == null) continue;
+                var placardId = *(uint*) ((byte*) obj.Address.ToPointer() + placardIdOffset);
                 if (!landSets.TryGetValue(placardId, out var landSet)) continue;
-                if (Utils.Distance(_pi.ClientState.LocalPlayer.Position, actor.Position) > renderDistance) continue;
+                if (Vector3.Distance(_clientState.LocalPlayer.Position, obj.Position) > renderDistance) continue;
 
-                DrawPlotPlate(actor, placardId, landSet);
+                DrawPlotPlate(obj, placardId, landSet);
             }
         }
 
@@ -100,9 +107,9 @@ namespace Housemate
                         objectName = furnitureObject.Item.Value.Name.ToString();
                 }
 
-                var nPos = _pi.ClientState?.LocalPlayer?.Position;
+                var nPos = _clientState.LocalPlayer?.Position;
 
-                if (!nPos.HasValue || !_pi.Framework.Gui.WorldToScreen(new SharpDX.Vector3 {X = hObject->X, Y = hObject->Y, Z = hObject->Z}, out var screenCoords)) continue;
+                if (!nPos.HasValue || !_gameGui.WorldToScreen(new Vector3 {X = hObject->X, Y = hObject->Y, Z = hObject->Z}, out var screenCoords)) continue;
 
                 if (Utils.DistanceFromPlayer(*hObject, nPos.Value) > renderDistance)
                     continue;
@@ -140,62 +147,60 @@ namespace Housemate
             }
         }
 
-        private void DrawPlotPlate(Actor placard, uint placardId, CommonLandSet land)
+        private void DrawPlotPlate(GameObject placard, uint placardId, CommonLandSet land)
         {
             if (!Mem.GetHousingController(out var controller)) return;
             var customize = controller.Houses(land.PlotIndex);
+            if (!_gameGui.WorldToScreen(new Vector3(placard.Position.X, placard.Position.Y + 4, placard.Position.Z), out var screenCoords)) return;
+            
+            ImGui.PushID($"Placard{placardId}");
+            ImGui.SetNextWindowPos(new Vector2(screenCoords.X, screenCoords.Y));
+            ImGui.SetNextWindowBgAlpha(0.5f);
+            ImGui.SetNextWindowViewport(ImGui.GetMainViewport().ID);
 
-            if (_pi.Framework.Gui.WorldToScreen(new SharpDX.Vector3 {X = placard.Position.X, Y = placard.Position.Z + 4, Z = placard.Position.Y}, out var screenCoords))
+            ImGui.Begin($"Plot {land.PlotIndex + 1}",
+                ImGuiWindowFlags.NoCollapse |
+                ImGuiWindowFlags.AlwaysAutoResize |
+                ImGuiWindowFlags.NoNavFocus |
+                ImGuiWindowFlags.NoBringToFrontOnFocus |
+                ImGuiWindowFlags.NoSavedSettings |
+                ImGuiWindowFlags.NoMove |
+                ImGuiWindowFlags.NoMouseInputs |
+                ImGuiWindowFlags.NoFocusOnAppearing |
+                ImGuiWindowFlags.NoNav
+            );
+
+            // Let's check if this is a unified exterior
+            var roof = customize.GetPart(ExteriorPartsType.Roof);
+            if (roof.FixtureKey != 0 && Data.IsUnitedExteriorPart(roof.FixtureKey, out var roofItem))
             {
-                ImGui.PushID($"Placard{placardId}");
-                ImGui.SetNextWindowPos(new Vector2(screenCoords.X, screenCoords.Y));
-                ImGui.SetNextWindowBgAlpha(0.5f);
-                ImGui.SetNextWindowViewport(ImGui.GetMainViewport().ID);
+                ImGui.Text($"Exterior: {roofItem.Name}");
 
-                ImGui.Begin($"Plot {land.PlotIndex + 1}",
-                    ImGuiWindowFlags.NoCollapse |
-                    ImGuiWindowFlags.AlwaysAutoResize |
-                    ImGuiWindowFlags.NoNavFocus |
-                    ImGuiWindowFlags.NoBringToFrontOnFocus |
-                    ImGuiWindowFlags.NoSavedSettings |
-                    ImGuiWindowFlags.NoMove |
-                    ImGuiWindowFlags.NoMouseInputs |
-                    ImGuiWindowFlags.NoFocusOnAppearing |
-                    ImGuiWindowFlags.NoNav
-                );
-
-                // Let's check if this is a unified exterior
-                var roof = customize.GetPart(ExteriorPartsType.Roof);
-                if (roof.FixtureKey != 0 && Data.IsUnitedExteriorPart(roof.FixtureKey, out var roofItem))
+                if (roof.Color != 0 && Data.TryGetStain(roof.Color, out var color))
                 {
-                    ImGui.Text($"Exterior: {roofItem.Name}");
+                    ImGui.SameLine();
+                    Utils.StainButton(roofItem.Name, color);
+                }
+            }
+            else
+            {
+                for (var i = 0; i < HouseCustomize.PartsMax; i++)
+                {
+                    var type = (ExteriorPartsType) i;
+                    var part = customize.GetPart(type);
+                    if (!Data.TryGetItem(part.FixtureKey, out var item)) continue;
+                    ImGui.Text($"{Utils.GetExteriorPartDescriptor(type)}: {item.Name}");
 
-                    if (roof.Color != 0 && Data.TryGetStain(roof.Color, out var color))
+                    if (part.Color != 0 && Data.TryGetStain(part.Color, out var color))
                     {
                         ImGui.SameLine();
-                        Utils.StainButton(roofItem.Name, color);
+                        Utils.StainButton(item.Name, color);
                     }
                 }
-                else
-                {
-                    for (var i = 0; i < HouseCustomize.PartsMax; i++)
-                    {
-                        var type = (ExteriorPartsType) i;
-                        var part = customize.GetPart(type);
-                        if (!Data.TryGetItem(part.FixtureKey, out var item)) continue;
-                        ImGui.Text($"{Utils.GetExteriorPartDescriptor(type)}: {item.Name}");
-
-                        if (part.Color != 0 && Data.TryGetStain(part.Color, out var color))
-                        {
-                            ImGui.SameLine();
-                            Utils.StainButton(item.Name, color);
-                        }
-                    }
-                }
-
-                ImGui.End();
-                ImGui.PopID();
             }
+
+            ImGui.End();
+            ImGui.PopID();
         }
 
         private void DrawMainWindow()
@@ -374,7 +379,7 @@ namespace Housemate
             ImGui.SetColumnWidth(0, 61f);
             ImGui.SetColumnWidth(1, 300f);
 
-            var nPos = _pi?.ClientState?.LocalPlayer?.Position;
+            var nPos = _clientState.LocalPlayer?.Position;
             if (!nPos.HasValue)
             {
                 ImGui.EndChild();

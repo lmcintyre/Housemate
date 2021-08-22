@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using Dalamud.Plugin;
+using Dalamud.Data;
+using Dalamud.Logging;
 using Lumina.Excel.GeneratedSheets;
-using Newtonsoft.Json;
 
 namespace Housemate
 {
@@ -17,9 +16,9 @@ namespace Housemate
         private readonly Dictionary<uint, uint> _unitedDict;
         private readonly Dictionary<uint, HousingYardObject> _yardObjectDict;
 
-        private HousingData(DalamudPluginInterface pi)
+        private HousingData(DataManager dataMgr)
         {
-            var sheet = pi.Data.GetExcelSheet<HousingLandSet>();
+            var sheet = dataMgr.GetExcelSheet<HousingLandSet>();
             uint[] terriKeys = {339, 340, 341, 641};
 
             _territoryToLandSetDict = new Dictionary<uint, Dictionary<uint, CommonLandSet>>();
@@ -38,19 +37,19 @@ namespace Housemate
                 _territoryToLandSetDict[terriKeys[i]] = rowDict;
             }
 
-            var unitedExteriorSheet = pi.Data.GetExcelSheet<HousingUnitedExterior>();
+            var unitedExteriorSheet = dataMgr.GetExcelSheet<HousingUnitedExterior>();
             _unitedDict = new Dictionary<uint, uint>();
             foreach (var row in unitedExteriorSheet)
             foreach (var item in row.Item)
                 _unitedDict[item.Row] = row.RowId;
 
-            _itemDict = pi.Data.GetExcelSheet<Item>()
+            _itemDict = dataMgr.GetExcelSheet<Item>()
                 .Where(item => item.AdditionalData != 0 && (item.ItemSearchCategory.Row == 65 || item.ItemSearchCategory.Row == 66))
                 .ToDictionary(row => row.AdditionalData, row => row);
 
-            _stainDict = pi.Data.GetExcelSheet<Stain>().ToDictionary(row => row.RowId, row => row);
-            _furnitureDict = pi.Data.GetExcelSheet<HousingFurniture>().ToDictionary(row => row.RowId, row => row);
-            _yardObjectDict = pi.Data.GetExcelSheet<HousingYardObject>().ToDictionary(row => row.RowId, row => row);
+            _stainDict = dataMgr.GetExcelSheet<Stain>().ToDictionary(row => row.RowId, row => row);
+            _furnitureDict = dataMgr.GetExcelSheet<HousingFurniture>().ToDictionary(row => row.RowId, row => row);
+            _yardObjectDict = dataMgr.GetExcelSheet<HousingYardObject>().ToDictionary(row => row.RowId, row => row);
 
             PluginLog.Log($"Loaded {_territoryToLandSetDict.Keys.Count} landset rows");
             PluginLog.Log($"Loaded {_furnitureDict.Keys.Count} furniture");
@@ -62,9 +61,9 @@ namespace Housemate
 
         public static HousingData Instance { get; private set; }
 
-        public static void Init(DalamudPluginInterface pi)
+        public static void Init(DataManager dataMgr)
         {
-            Instance = new HousingData(pi);
+            Instance = new HousingData(dataMgr);
         }
 
         public bool TryGetYardObject(uint id, out HousingYardObject yardObject)
