@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net472</TargetFramework>
+    <TargetFramework>net5.0-windows</TargetFramework>
     <LangVersion>preview</LangVersion>
     <AssemblyTitle>Housemate</AssemblyTitle>
     <Product>Housemate</Product>
@@ -32,7 +32,7 @@
       <HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\Lumina.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Lumina">
+    <Reference Include="Lumina.Excel">
       <HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\Lumina.Excel.dll</HintPath>
       <Private>False</Private>
     </Reference>
@@ -40,35 +40,11 @@
       <HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\ImGuiScene.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\Newtonsoft.Json.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="SharpDX.Mathematics">
-      <HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\SharpDX.Mathematics.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="System.Numerics.Vectors">
-      <HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\System.Numerics.Vectors.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="System">
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="System.Core">
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="System.Numerics">
-      <Private>false</Private>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Housemate.yaml" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DalamudPackager" Version="1.2.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.3">
-      <ExcludeAssets>all</ExcludeAssets>
-    </PackageReference>
+    <PackageReference Include="DalamudPackager" Version="1.2.3" />
   </ItemGroup>
 </Project>

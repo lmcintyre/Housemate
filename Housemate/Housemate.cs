@@ -1,4 +1,10 @@
-﻿using Dalamud.Game.Command;
+﻿using Dalamud.Data;
+using Dalamud.Game;
+using Dalamud.Game.ClientState;
+using Dalamud.Game.ClientState.Objects;
+using Dalamud.Game.Command;
+using Dalamud.Game.Gui;
+using Dalamud.IoC;
 using Dalamud.Plugin;
 
 namespace Housemate
@@ -8,35 +14,43 @@ namespace Housemate
         private const string CommandName = "/housemate";
 
         private DalamudPluginInterface _pi;
+        private CommandManager _commandManager;
         private HousemateUI _ui;
         private Configuration _configuration;
         public string Name => "Housemate";
 
-        public void Initialize(DalamudPluginInterface pluginInterface)
+        public Housemate(
+            [RequiredVersion("1.0")] DalamudPluginInterface pluginInterface,
+            [RequiredVersion("1.0")] CommandManager commandManager,
+            [RequiredVersion("1.0")] DataManager dataManager,
+            [RequiredVersion("1.0")] ObjectTable objectTable,
+            [RequiredVersion("1.0")] ClientState clientState,
+            [RequiredVersion("1.0")] GameGui gameGui,
+            [RequiredVersion("1.0")] SigScanner sigScanner)
         {
             _pi = pluginInterface;
+            _commandManager = commandManager;
 
             _configuration = _pi.GetPluginConfig() as Configuration ?? new Configuration();
             _configuration.Initialize(_pi);
-            _ui = new HousemateUI(_configuration, _pi);
+            _ui = new HousemateUI(_configuration, objectTable, clientState, gameGui);
 
-            _pi.CommandManager.AddHandler(CommandName, new CommandInfo(OnCommand)
+            commandManager.AddHandler(CommandName, new CommandInfo(OnCommand)
             {
-                HelpMessage = "/housemate will open the Housemate window."
+                HelpMessage = "Display the Housemate configuration interface."
             });
 
-            HousingData.Init(_pi);
-            HousingMemory.Init(_pi);
+            HousingData.Init(dataManager);
+            HousingMemory.Init(sigScanner);
 
-            _pi.UiBuilder.OnBuildUi += DrawUI;
-            _pi.UiBuilder.OnOpenConfigUi += (_, _) => DrawConfigUI();
+            _pi.UiBuilder.Draw += DrawUI;
+            _pi.UiBuilder.OpenConfigUi += (_, _) => DrawConfigUI();
         }
 
         public void Dispose()
         {
             _ui.Dispose();
-
-            _pi.CommandManager.RemoveHandler(CommandName);
+            _commandManager.RemoveHandler(CommandName);
             _pi.Dispose();
         }
 
