@@ -1,8 +1,14 @@
 ﻿name: Housemate
 author: perchbird
 description: |-
-  Displays information about housing fixtures and objects.
-  /housemate opens the UI.
+  Housemate offers multiple features that help you gain inspiration from other homes in XIV.
+  If you're looking for a specific home or outdoor item, you can check the exterior list
+  when running around a ward. If you're interested in seeing what items make up a
+  structure in a home - turn on the item overlay to see what they are!
+  
+  Note: This plugin is purely informational, and does not assist you in placing
+  or "glitching" housing items.
+punchline: Displays information about housing fixtures and objects.
 repo_url: https://github.com/lmcintyre/Housemate
 dalamud_api_level: 4
 icon_url: https://raw.githubusercontent.com/lmcintyre/Housemate/main/images/icon.png
