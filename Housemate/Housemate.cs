@@ -44,7 +44,7 @@ namespace Housemate
             HousingMemory.Init(sigScanner);
 
             _pi.UiBuilder.Draw += DrawUI;
-            _pi.UiBuilder.OpenConfigUi += (_, _) => DrawConfigUI();
+            _pi.UiBuilder.OpenConfigUi += DrawConfigUI;
         }
 
         public void Dispose()
