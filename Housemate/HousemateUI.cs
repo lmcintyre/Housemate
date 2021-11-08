@@ -88,7 +88,7 @@ namespace Housemate
         private unsafe void Render(float renderDistance = 50f)
         {
             var mgr = Mem.CurrentManager;
-            if (mgr == null) return;
+            if (mgr == null || Mem.IsWorkshop()) return;
 
             for (var i = 0; i < 400; i++)
             {
@@ -101,10 +101,10 @@ namespace Housemate
                     if (Data.TryGetYardObject(hObject->housingRowId, out var yardObject))
                         objectName = yardObject.Item.Value.Name.ToString();
                 }
-                else
+                else if (Mem.IsIndoors())
                 {
-                    if (Data.TryGetFurniture(hObject->housingRowId, out var furnitureObject))
-                        objectName = furnitureObject.Item.Value.Name.ToString();
+	                if (Data.TryGetFurniture(hObject->housingRowId, out var furnitureObject))
+		                objectName = furnitureObject.Item.Value.Name.ToString();
                 }
 
                 var nPos = _clientState.LocalPlayer?.Position;

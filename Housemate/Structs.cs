@@ -122,6 +122,7 @@ namespace Housemate
         [FieldOffset(0x0)] public HousingObjectManager* currentTerritory;
         [FieldOffset(0x8)] public HousingObjectManager* outdoorTerritory;
         [FieldOffset(0x10)] public HousingObjectManager* indoorTerritory;
+        [FieldOffset(0x18)] public void* workshopTerritory;
 
         // [FieldOffset(0x9704)] public uint CurrentIndoorFloor;
 
@@ -138,6 +139,11 @@ namespace Housemate
         public bool IsIndoors()
         {
             return indoorTerritory != null;
+        }
+
+        public bool IsWorkshop()
+        {
+	        return workshopTerritory != null;
         }
 
         // Remaps game floors to our floor enum

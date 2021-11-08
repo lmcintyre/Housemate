@@ -253,5 +253,11 @@ namespace Housemate
             if (HousingModule == null) return false;
             return HousingModule->IsIndoors();
         }
+
+        public unsafe bool IsWorkshop()
+        {
+	        if (HousingModule == null) return false;
+	        return HousingModule->IsWorkshop();
+        }
     }
 }
