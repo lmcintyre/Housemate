@@ -19,7 +19,7 @@ namespace Housemate
         private HousingData(DataManager dataMgr)
         {
             var sheet = dataMgr.GetExcelSheet<HousingLandSet>();
-            uint[] terriKeys = {339, 340, 341, 641};
+            uint[] terriKeys = {339, 340, 341, 641, 979};
 
             _territoryToLandSetDict = new Dictionary<uint, Dictionary<uint, CommonLandSet>>();
 

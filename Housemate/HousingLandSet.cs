@@ -15,8 +15,8 @@ namespace Housemate
 
         public override void PopulateData(RowParser parser, GameData data, Language language)
         {
-            RowId = parser.Row;
-            SubRowId = parser.SubRow;
+            RowId = parser.RowId;
+            SubRowId = parser.SubRowId;
             
             LandSets = parser.ReadStructuresAsArray<LandSet>(0, 60);
             UnknownRange = parser.ReadColumn<uint>(300);
