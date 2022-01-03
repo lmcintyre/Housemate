@@ -37,7 +37,8 @@ namespace Housemate
 
             commandManager.AddHandler(CommandName, new CommandInfo(OnCommand)
             {
-                HelpMessage = "Display the Housemate configuration interface."
+                HelpMessage = $"Display the Housemate configuration interface.\n" +
+                              $"Toggle the Housemate object overlay with '{CommandName} toggle'"
             });
 
             HousingData.Init(dataManager);
@@ -56,12 +57,18 @@ namespace Housemate
 
         private void OnCommand(string command, string args)
         {
-            _ui.Visible = true;
+            if (args == "toggle")
+            {
+                _configuration.Render = !_configuration.Render;
+                return;
+            }
+            
+            _ui.Visible = !_ui.Visible;
         }
         
         private void DrawConfigUI()
         {
-            _ui.Visible = true;
+            _ui.Visible = !_ui.Visible;
         }
         
         private void DrawUI()
