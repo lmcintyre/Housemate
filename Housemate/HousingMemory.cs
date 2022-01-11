@@ -15,36 +15,30 @@ namespace Housemate
         {
             try
             {
-                HousingModulePtr =
+                HousingModuleBasePtr =
                     scanner.GetStaticAddressFromSig(
                         "40 53 48 83 EC 20 33 DB 48 39 1D ?? ?? ?? ?? 75 2C 45 33 C0 33 D2 B9 ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 85 C0 74 11 48 8B C8 E8 ?? ?? ?? ?? 48 89 05 ?? ?? ?? ?? EB 07", 0xA);
 
-                LayoutWorldPtr =
+                LayoutWorldBasePtr =
                     scanner.GetStaticAddressFromSig(
                         "48 8B 05 ?? ?? ?? ?? 48 8B 48 20 48 85 C9 74 31 83 B9 ?? ?? ?? ?? ?? 74 28 80 B9 ?? ?? ?? ?? ?? 75 1F 80 B9 ?? ?? ?? ?? ?? 74 03 B0 01 C3", 2);
 
-                PluginLog.Log($"Pre-HousingModule at {HousingModulePtr.ToInt64():X}");
-                PluginLog.Log($"Pre-LayoutWorld at {LayoutWorldPtr.ToInt64():X}");
-
-                HousingModulePtr = Marshal.ReadIntPtr(HousingModulePtr);
-                LayoutWorldPtr = Marshal.ReadIntPtr(LayoutWorldPtr);
-
-                PluginLog.Log($"HousingModule at {HousingModulePtr.ToInt64():X}");
-                PluginLog.Log($"LayoutWorld at {LayoutWorldPtr.ToInt64():X}");
+                PluginLog.Log($"HousingModuleBase at {HousingModuleBasePtr.ToInt64():X}");
+                PluginLog.Log($"LayoutWorldBase at {LayoutWorldBasePtr.ToInt64():X}");
             }
             catch (Exception e)
             {
-                PluginLog.Log(e, "Could not load Housemate!!");
+                PluginLog.Error(e, "Could not load Housemate!");
             }
         }
 
         public static HousingMemory Instance { get; private set; }
 
-        private IntPtr HousingModulePtr { get; }
-        private IntPtr LayoutWorldPtr { get; }
+        private IntPtr HousingModuleBasePtr { get; }
+        private IntPtr LayoutWorldBasePtr { get; }
 
-        private unsafe HousingModule* HousingModule => (HousingModule*) HousingModulePtr;
-        private unsafe LayoutWorld* LayoutWorld => (LayoutWorld*) LayoutWorldPtr;
+        private unsafe HousingModule* HousingModule => HousingModuleBasePtr != IntPtr.Zero ? (HousingModule*) Marshal.ReadIntPtr(HousingModuleBasePtr) : null;
+        private unsafe LayoutWorld* LayoutWorld => LayoutWorldBasePtr != IntPtr.Zero ? (LayoutWorld*) Marshal.ReadIntPtr(LayoutWorldBasePtr) : null;
         public unsafe HousingObjectManager* CurrentManager => HousingModule->currentTerritory;
 
         public static void Init(SigScanner scanner)
