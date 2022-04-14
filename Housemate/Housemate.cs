@@ -52,7 +52,6 @@ namespace Housemate
         {
             _ui.Dispose();
             _commandManager.RemoveHandler(CommandName);
-            _pi.Dispose();
         }
 
         private void OnCommand(string command, string args)
