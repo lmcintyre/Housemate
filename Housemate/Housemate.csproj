@@ -1,14 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <DalamudLibPath>$(appdata)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
+    <PluginVersion>1.0.2.6</PluginVersion>
+  </PropertyGroup>
+  
+  <PropertyGroup>
     <TargetFramework>net5.0-windows</TargetFramework>
     <LangVersion>preview</LangVersion>
     <AssemblyTitle>Housemate</AssemblyTitle>
     <Product>Housemate</Product>
-    <Description>Displays information about housing fixtures and objects.</Description>
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <Version>$(PluginVersion)</Version>
+    <FileVersion>$(PluginVersion)</FileVersion>
+    <AssemblyVersion>$(PluginVersion)</AssemblyVersion>
   </PropertyGroup>
   
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -22,30 +30,26 @@
 
   <ItemGroup>
     <Reference Include="Dalamud">
-      <HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\Dalamud.dll</HintPath>
+      <HintPath>$(DalamudLibPath)Dalamud.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="ImGui.NET">
-      <HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\ImGui.NET.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Lumina">
-      <HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\Lumina.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Lumina.Excel">
-      <HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\Lumina.Excel.dll</HintPath>
+      <HintPath>$(DalamudLibPath)ImGui.NET.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="ImGuiScene">
-      <HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\ImGuiScene.dll</HintPath>
+      <HintPath>$(DalamudLibPath)ImGuiScene.dll</HintPath>
       <Private>False</Private>
     </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Housemate.yaml" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="DalamudPackager" Version="2.1.6" />
+    <Reference Include="Lumina">
+      <HintPath>$(DalamudLibPath)Lumina.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Lumina.Excel">
+      <HintPath>$(DalamudLibPath)Lumina.Excel.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
+    <PackageReference Include="DalamudPackager" Version="2.1.7" />
   </ItemGroup>
 </Project>
