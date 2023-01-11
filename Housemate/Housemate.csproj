@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <DalamudLibPath>$(appdata)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
-    <PluginVersion>1.0.2.7</PluginVersion>
+    <PluginVersion>1.0.2.8</PluginVersion>
   </PropertyGroup>
   
   <PropertyGroup>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <TargetFramework>net7.0-windows</TargetFramework>
     <LangVersion>preview</LangVersion>
     <AssemblyTitle>Housemate</AssemblyTitle>
     <Product>Housemate</Product>
@@ -50,6 +50,6 @@
       <Private>False</Private>
     </Reference>
 
-    <PackageReference Include="DalamudPackager" Version="2.1.8" />
+    <PackageReference Include="DalamudPackager" Version="2.1.10" />
   </ItemGroup>
 </Project>
