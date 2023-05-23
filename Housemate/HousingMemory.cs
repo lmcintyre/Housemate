@@ -16,7 +16,7 @@ namespace Housemate
             try
             {
                 HousingModuleBasePtr = scanner.GetStaticAddressFromSig("48 8B 05 ?? ?? ?? ?? 8B 52");
-                LayoutWorldBasePtr = scanner.GetStaticAddressFromSig("48 8B 0D ?? ?? ?? ?? 85 D2");
+                LayoutWorldBasePtr = scanner.GetStaticAddressFromSig("48 8B 0D ?? ?? ?? ?? 85 C0 74 15");
 
                 PluginLog.Log($"HousingModuleBase at {HousingModuleBasePtr.ToInt64():X}");
                 PluginLog.Log($"LayoutWorldBase at {LayoutWorldBasePtr.ToInt64():X}");
