@@ -2,11 +2,8 @@
 using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using Dalamud.Game.ClientState;
-using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.Types;
-using Dalamud.Game.Gui;
-using Dalamud.Logging;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 
 namespace Housemate
@@ -18,9 +15,9 @@ namespace Housemate
 
         private ImGuiListClipperPtr _clipper;
         private readonly Configuration _configuration;
-        private readonly ObjectTable _objectTable;
-        private readonly ClientState _clientState;
-        private readonly GameGui _gameGui;
+        private readonly IObjectTable _objectTable;
+        private readonly IClientState _clientState;
+        private readonly IGameGui _gameGui;
         
         private bool _visible;
         public bool Visible
@@ -35,16 +32,9 @@ namespace Housemate
         private static HousingData Data => HousingData.Instance;
         private static HousingMemory Mem => HousingMemory.Instance;
 
-        public HousemateUI(
-            Configuration configuration,
-            ObjectTable objectTable,
-            ClientState clientState,
-            GameGui gameGui)
+        public HousemateUI(Configuration configuration)
         {
             _configuration = configuration;
-            _objectTable = objectTable;
-            _clientState = clientState;
-            _gameGui = gameGui;
 
             var clipperNative = Marshal.AllocHGlobal(Marshal.SizeOf<ImGuiListClipper>());
             var clipper = new ImGuiListClipper();
@@ -506,7 +496,7 @@ namespace Housemate
             }
             catch (Exception e)
             {
-                PluginLog.Log(e, "hey");
+                DalamudApi.PluginLog.Error(e, "hey");
             }
 
             ImGui.EndChild();

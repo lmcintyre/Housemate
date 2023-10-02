@@ -3,27 +3,24 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using Dalamud.Game;
-using Dalamud.Logging;
-using Dalamud.Plugin;
 
 namespace Housemate
 {
     public class HousingMemory
     {
-        private HousingMemory(SigScanner scanner)
+        private HousingMemory()
         {
             try
             {
-                HousingModuleBasePtr = scanner.GetStaticAddressFromSig("48 8B 05 ?? ?? ?? ?? 8B 52");
-                LayoutWorldBasePtr = scanner.GetStaticAddressFromSig("48 8B 0D ?? ?? ?? ?? 85 C0 74 15");
+                HousingModuleBasePtr = DalamudApi.SigScanner.GetStaticAddressFromSig("48 8B 05 ?? ?? ?? ?? 8B 52");
+                LayoutWorldBasePtr = DalamudApi.SigScanner.GetStaticAddressFromSig("48 8B 0D ?? ?? ?? ?? 85 C0 74 15");
 
-                PluginLog.Log($"HousingModuleBase at {HousingModuleBasePtr.ToInt64():X}");
-                PluginLog.Log($"LayoutWorldBase at {LayoutWorldBasePtr.ToInt64():X}");
+                DalamudApi.PluginLog.Info($"HousingModuleBase at {HousingModuleBasePtr.ToInt64():X}");
+                DalamudApi.PluginLog.Info($"LayoutWorldBase at {LayoutWorldBasePtr.ToInt64():X}");
             }
             catch (Exception e)
             {
-                PluginLog.Error(e, "Could not load Housemate!");
+                DalamudApi.PluginLog.Error(e, "Could not load Housemate!");
             }
         }
 
@@ -36,9 +33,9 @@ namespace Housemate
         private unsafe LayoutWorld* LayoutWorld => LayoutWorldBasePtr != IntPtr.Zero ? (LayoutWorld*) Marshal.ReadIntPtr(LayoutWorldBasePtr) : null;
         public unsafe HousingObjectManager* CurrentManager => HousingModule->currentTerritory;
 
-        public static void Init(SigScanner scanner)
+        public static void Init()
         {
-            Instance = new HousingMemory(scanner);
+            Instance = new HousingMemory();
         }
 
         public unsafe InteriorFloor CurrentFloor()
