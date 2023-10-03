@@ -8,14 +8,14 @@ namespace Housemate
 {
     public class HousingMemory
     {
-        private HousingMemory()
+        private unsafe HousingMemory()
         {
             try
             {
                 HousingModuleBasePtr = DalamudApi.SigScanner.GetStaticAddressFromSig("48 8B 05 ?? ?? ?? ?? 8B 52");
                 LayoutWorldBasePtr = DalamudApi.SigScanner.GetStaticAddressFromSig("48 8B 0D ?? ?? ?? ?? 85 C0 74 15");
-
                 DalamudApi.PluginLog.Info($"HousingModuleBase at {HousingModuleBasePtr.ToInt64():X}");
+                DalamudApi.PluginLog.Info($"HousingModule at {(ulong)HousingModule:X}");
                 DalamudApi.PluginLog.Info($"LayoutWorldBase at {LayoutWorldBasePtr.ToInt64():X}");
             }
             catch (Exception e)

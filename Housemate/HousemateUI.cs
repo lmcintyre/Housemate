@@ -15,9 +15,6 @@ namespace Housemate
 
         private ImGuiListClipperPtr _clipper;
         private readonly Configuration _configuration;
-        private readonly IObjectTable _objectTable;
-        private readonly IClientState _clientState;
-        private readonly IGameGui _gameGui;
         
         private bool _visible;
         public bool Visible
@@ -64,12 +61,12 @@ namespace Housemate
 
             if (!Data.TryGetLandSetDict(Mem.GetTerritoryTypeId(), out var landSets)) return;
 
-            foreach (var obj in _objectTable)
+            foreach (var obj in DalamudApi.ObjectTable)
             {
-                if (_clientState.LocalPlayer == null) continue;
+                if (DalamudApi.ClientState.LocalPlayer == null) continue;
                 var placardId = *(uint*) ((byte*) obj.Address.ToPointer() + placardIdOffset);
                 if (!landSets.TryGetValue(placardId, out var landSet)) continue;
-                if (Vector3.Distance(_clientState.LocalPlayer.Position, obj.Position) > renderDistance) continue;
+                if (Vector3.Distance(DalamudApi.ClientState.LocalPlayer.Position, obj.Position) > renderDistance) continue;
 
                 DrawPlotPlate(obj, placardId, landSet);
             }
@@ -97,9 +94,9 @@ namespace Housemate
 		                objectName = furnitureObject.Item.Value.Name.ToString();
                 }
 
-                var nPos = _clientState.LocalPlayer?.Position;
+                var nPos = DalamudApi.ClientState.LocalPlayer?.Position;
 
-                if (!nPos.HasValue || !_gameGui.WorldToScreen(new Vector3 {X = hObject->X, Y = hObject->Y, Z = hObject->Z}, out var screenCoords)) continue;
+                if (!nPos.HasValue || !DalamudApi.GameGui.WorldToScreen(new Vector3 {X = hObject->X, Y = hObject->Y, Z = hObject->Z}, out var screenCoords)) continue;
 
                 if (Utils.DistanceFromPlayer(*hObject, nPos.Value) > renderDistance)
                     continue;
@@ -141,7 +138,7 @@ namespace Housemate
         {
             if (!Mem.GetHousingController(out var controller)) return;
             var customize = controller.Houses(land.PlotIndex);
-            if (!_gameGui.WorldToScreen(new Vector3(placard.Position.X, placard.Position.Y + 4, placard.Position.Z), out var screenCoords)) return;
+            if (!DalamudApi.GameGui.WorldToScreen(new Vector3(placard.Position.X, placard.Position.Y + 4, placard.Position.Z), out var screenCoords)) return;
             
             ImGui.PushID($"Placard{placardId}");
             ImGui.SetNextWindowPos(new Vector2(screenCoords.X, screenCoords.Y));
@@ -352,7 +349,7 @@ namespace Housemate
                 ImGui.Text("Nearby housing objects");
             }
             _objectsOpen = true;
-
+            
             ImGui.BeginChild("##COLUMNAPIISDUMBIHATEYOU2", new Vector2(200, ImGui.GetFontSize()), false);
             ImGui.Columns(2);
             ImGui.Text("Distance");
@@ -369,7 +366,7 @@ namespace Housemate
             ImGui.SetColumnWidth(0, 61f);
             ImGui.SetColumnWidth(1, 300f);
 
-            var nPos = _clientState.LocalPlayer?.Position;
+            var nPos = DalamudApi.ClientState.LocalPlayer?.Position;
             if (!nPos.HasValue)
             {
                 ImGui.EndChild();

@@ -150,7 +150,7 @@ namespace Housemate
         public InteriorFloor CurrentFloor()
         {
             if (indoorTerritory == null) return InteriorFloor.None;
-            var gameFloor = *(int*) ((byte*) indoorTerritory + 0x9704);
+            var gameFloor = *(int*) ((byte*) indoorTerritory + 0x970C);
 
             return gameFloor switch
             {
