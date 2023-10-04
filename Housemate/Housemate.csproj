@@ -1,7 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <DalamudLibPath>$(appdata)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
-    <PluginVersion>1.0.2.10</PluginVersion>
+<!--    <DalamudLibPath>$(appdata)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>-->
+    <DalamudLibPath>C:\Users\Liam\Documents\repos\DalamudNet7\bin\Debug\</DalamudLibPath>
+
+    <PluginVersion>1.0.2.11</PluginVersion>
   </PropertyGroup>
   
   <PropertyGroup>
