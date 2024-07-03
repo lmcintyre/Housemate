@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Dalamud.Game.ClientState.Objects.Types;
-using Dalamud.Plugin.Services;
 using ImGuiNET;
 
 namespace Housemate
@@ -134,7 +133,7 @@ namespace Housemate
             }
         }
 
-        private void DrawPlotPlate(GameObject placard, uint placardId, CommonLandSet land)
+        private void DrawPlotPlate(IGameObject placard, uint placardId, CommonLandSet land)
         {
             if (!Mem.GetHousingController(out var controller)) return;
             var customize = controller.Houses(land.PlotIndex);

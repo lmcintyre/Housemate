@@ -10,7 +10,7 @@ namespace Housemate
         private readonly HousemateUI _ui;
         private readonly Configuration _configuration;
 
-        public Housemate(DalamudPluginInterface pi)
+        public Housemate(IDalamudPluginInterface pi)
         {
             DalamudApi.Initialize(pi);
             
